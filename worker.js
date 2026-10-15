@@ -1720,10 +1720,41 @@ async function handleRequest(request) {
       return makeRes('Invalid URL: must start with http:// or https://', 400);
     }
     
-    // 创建一个假的 URL 对象来复用 handleGitHub
-    const fakeUrl = new URL(request.url);
-    fakeUrl.pathname = '/' + targetUrl;
-    return handleGitHub(request, fakeUrl);
+    // 直接代理请求，不通过 handleGitHub
+    try {
+      const headers = new Headers(request.headers);
+      headers.delete('host');
+      headers.delete('cf-connecting-ip');
+      headers.delete('cf-ipcountry');
+      headers.delete('cf-ray');
+      headers.delete('cf-visitor');
+      
+      const response = await fetch(targetUrl, {
+        method: request.method,
+        headers: headers,
+        body: request.method === 'GET' || request.method === 'HEAD' ? null : request.body,
+        redirect: 'follow',
+      });
+
+      const newHeaders = new Headers(response.headers);
+      newHeaders.set('access-control-allow-origin', '*');
+      newHeaders.set('access-control-expose-headers', '*');
+      newHeaders.delete('content-security-policy');
+      newHeaders.delete('x-frame-options');
+      
+      // 保留 Content-Disposition 用于下载
+      const contentDisposition = response.headers.get('content-disposition');
+      if (contentDisposition) {
+        newHeaders.set('content-disposition', contentDisposition);
+      }
+
+      return new Response(response.body, {
+        status: response.status,
+        headers: newHeaders,
+      });
+    } catch (error) {
+      return makeRes(`Error fetching ${targetUrl}: ${error.message}`, 502);
+    }
   }
 
   // 检查是否是注册表路径前缀（例如 /ghcr.io/... 或 /gcr.io/...）
@@ -1757,8 +1788,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.7.2-debug',  // 版本号
-      buildDate: '2024-10-15T14:30:00Z',
+      version: '1.7.3',  // 版本号
+      buildDate: '2024-10-15T14:35:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
