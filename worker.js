@@ -1426,23 +1426,6 @@ function handleDockerHubLibraryRedirect(pathname) {
 async function handleRequest(request) {
   const url = new URL(request.url);
   
-  // 全局调试：记录所有请求的 pathname
-  const debugInfo = {
-    pathname: url.pathname,
-    fullUrl: request.url,
-    startsWithHttps: url.pathname.startsWith('/https://'),
-    startsWithHttp: url.pathname.startsWith('/http://')
-  };
-  
-  // 如果是 /https:// 或 /http:// 开头，直接返回调试信息
-  if (url.pathname.startsWith('/https://') || url.pathname.startsWith('/http://')) {
-    return makeRes(JSON.stringify({
-      message: '🎯 ROUTE MATCHED at entry!',
-      debugInfo: debugInfo,
-      nextStep: 'Should call handleGitHub'
-    }, null, 2), 200, { 'Content-Type': 'application/json' });
-  }
-
   // 处理 OPTIONS 预检请求
   if (request.method === 'OPTIONS') {
     return new Response(null, PREFLIGHT_INIT);
@@ -1487,7 +1470,7 @@ async function handleRequest(request) {
       }
     }, null, 2), 200, { 'Content-Type': 'application/json' });
   }
-  
+
   // 测试路由端点
   if (url.pathname === '/test-route') {
     const testPath = '/https://github.com/test';
@@ -1530,19 +1513,21 @@ async function handleRequest(request) {
     }
   }
 
-  // GitHub 和其他 URL 加速（必须在 pathParts 检查之前）
+  // GitHub 和其他 URL 加速 - 方式1：/https://... 格式（可能被 Cloudflare 阻止）
   if (url.pathname.startsWith('/http://') || url.pathname.startsWith('/https://')) {
-    // 返回调试信息而不是实际处理
-    return makeRes(JSON.stringify({
-      message: 'GitHub handler matched!',
-      pathname: url.pathname,
-      targetUrl: url.pathname.slice(1) + url.search,
-      willCallHandleGitHub: true
-    }, null, 2), 200, { 'Content-Type': 'application/json' });
-    
-    // 原来的代码（暂时注释）
-    // console.log('Entering handleGitHub, pathname:', url.pathname);
-    // return handleGitHub(request, url);
+    return handleGitHub(request, url);
+  }
+  
+  // GitHub 和其他 URL 加速 - 方式2：/proxy?url=... 格式（推荐）
+  if (url.pathname === '/proxy' && url.searchParams.has('url')) {
+    const targetUrl = url.searchParams.get('url');
+    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+      return makeRes('Invalid URL: must start with http:// or https://', 400);
+    }
+    // 创建一个假的 URL 对象来复用 handleGitHub
+    const fakeUrl = new URL(request.url);
+    fakeUrl.pathname = '/' + targetUrl;
+    return handleGitHub(request, fakeUrl);
   }
 
   // 检查是否是注册表路径前缀（例如 /ghcr.io/... 或 /gcr.io/...）
@@ -1576,8 +1561,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.3.2-debug',  // 版本号
-      buildDate: '2024-10-15T13:10:00Z',
+      version: '1.4.0',  // 版本号
+      buildDate: '2024-10-15T13:20:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
