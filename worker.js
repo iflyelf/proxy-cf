@@ -678,6 +678,53 @@ function generateHomePage() {
                 background: var(--bg-secondary);
             }
         }
+        
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(201, 168, 130, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            opacity: 0;
+        }
+        
+        .back-to-top.show {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .back-to-top:hover {
+            background: var(--color-secondary);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(201, 168, 130, 0.5);
+        }
+        
+        .back-to-top:active {
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -695,6 +742,16 @@ function generateHomePage() {
                 <button onclick="generateProxyUrl()">生成加速链接</button>
             </div>
             <div id="result" class="result"></div>
+        </div>
+
+        <div class="url-input-section" style="margin-top: 30px;">
+            <h2>🔄 GitHub 克隆加速</h2>
+            <p>生成 Git Clone 加速链接，无需配置直接使用</p>
+            <div class="input-group">
+                <input type="url" id="gitUrl" placeholder="请输入 GitHub 仓库地址（例如：https://github.com/user/repo.git）">
+                <button onclick="generateGitCloneUrl()">生成克隆命令</button>
+            </div>
+            <div id="gitResult" class="result"></div>
         </div>
 
         <div class="services">
@@ -1178,6 +1235,11 @@ curl -I 'https://${CONFIG.domain}/proxy?url=https://sourceforge.net/'
             <p>Powered by Cloudflare Workers | <a href="https://github.com/iflyelf/proxy-cf" target="_blank">GitHub</a> | <a href="https://www.danxiaonuo.me" target="_blank">xiaonuo</a></p>
             <p style="margin-top: 10px; opacity: 0.8;">开源、免费、无限制</p>
         </footer>
+        
+        <!-- 返回顶部按钮 -->
+        <button class="back-to-top" id="backToTop" onclick="scrollToTop()" title="返回顶部">
+            ↑
+        </button>
     </div>
 
     <script>
@@ -1270,6 +1332,73 @@ curl -I 'https://${CONFIG.domain}/proxy?url=https://sourceforge.net/'
         document.getElementById('url').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 generateProxyUrl();
+            }
+        });
+        
+        // Git Clone URL 生成函数
+        function generateGitCloneUrl() {
+            const gitUrl = document.getElementById('gitUrl').value.trim();
+            const resultDiv = document.getElementById('gitResult');
+            
+            if (!gitUrl) {
+                resultDiv.innerHTML = '<span style="color: #e74c3c;">❌ 请输入有效的 GitHub 仓库地址</span>';
+                resultDiv.classList.add('show');
+                return;
+            }
+
+            if (!gitUrl.startsWith('https://github.com/') && !gitUrl.startsWith('http://github.com/')) {
+                resultDiv.innerHTML = '<span style="color: #e74c3c;">❌ 请输入 GitHub 仓库地址（以 https://github.com/ 开头）</span>';
+                resultDiv.classList.add('show');
+                return;
+            }
+
+            const cloneUrl = window.location.origin + '/proxy?url=' + encodeURIComponent(gitUrl);
+            const gitCommand = 'git clone ' + cloneUrl;
+
+            resultDiv.innerHTML = \`
+                <div style="margin-bottom: 10px;">
+                    <strong>✅ Git Clone 命令已生成：</strong>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>单次克隆命令：</strong><br>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px; background: var(--bg-secondary); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <code style="flex: 1; word-break: break-all; font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;">\${gitCommand}</code>
+                        <button class="copy-btn" onclick="copyToClipboard('\${gitCommand.replace(/'/g, "\\'")}', this)" style="position: static; opacity: 1;">复制</button>
+                    </div>
+                </div>
+                <div style="padding: 12px; background: rgba(201, 168, 130, 0.1); border-radius: 6px; border-left: 3px solid var(--color-primary);">
+                    <strong>💡 提示：</strong><br>
+                    <span style="font-size: 0.9rem; color: var(--color-text-light);">
+                    • 直接复制命令到终端执行即可<br>
+                    • 无需配置，单次使用<br>
+                    • 支持所有 GitHub 公开仓库
+                    </span>
+                </div>
+            \`;
+            resultDiv.classList.add('show');
+        }
+
+        document.getElementById('gitUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateGitCloneUrl();
+            }
+        });
+        
+        // 返回顶部功能
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        
+        // 监听滚动事件，显示/隐藏返回顶部按钮
+        window.addEventListener('scroll', function() {
+            const backToTopBtn = document.getElementById('backToTop');
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
             }
         });
     </script>
@@ -1831,8 +1960,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.8.1',  // 版本号
-      buildDate: '2024-10-15T14:50:00Z',
+      version: '1.9.0',  // 版本号
+      buildDate: '2024-10-15T15:00:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
