@@ -1447,6 +1447,30 @@ async function handleRequest(request) {
     }, null, 2), 200, { 'Content-Type': 'application/json' });
   }
   
+  // 直接测试 pathname 匹配
+  if (url.pathname === '/debug-path') {
+    const testPaths = [
+      '/https://github.com/test',
+      '/https://httpbin.org/get',
+      '/http://example.com'
+    ];
+    return makeRes(JSON.stringify({
+      actualPathname: url.pathname,
+      testResults: testPaths.map(p => ({
+        path: p,
+        startsWithHttps: p.startsWith('/https://'),
+        startsWithHttp: p.startsWith('/http://'),
+        wouldMatch: p.startsWith('/http://') || p.startsWith('/https://')
+      })),
+      actualPathnameCheck: {
+        startsWithHttps: url.pathname.startsWith('/https://'),
+        startsWithHttp: url.pathname.startsWith('/http://'),
+        firstChar: url.pathname[0],
+        first8Chars: url.pathname.substring(0, 8)
+      }
+    }, null, 2), 200, { 'Content-Type': 'application/json' });
+  }
+  
   // 测试路由端点
   if (url.pathname === '/test-route') {
     const testPath = '/https://github.com/test';
@@ -1491,9 +1515,17 @@ async function handleRequest(request) {
 
   // GitHub 和其他 URL 加速（必须在 pathParts 检查之前）
   if (url.pathname.startsWith('/http://') || url.pathname.startsWith('/https://')) {
-    // 调试：记录进入 GitHub 处理
-    console.log('Entering handleGitHub, pathname:', url.pathname);
-    return handleGitHub(request, url);
+    // 返回调试信息而不是实际处理
+    return makeRes(JSON.stringify({
+      message: 'GitHub handler matched!',
+      pathname: url.pathname,
+      targetUrl: url.pathname.slice(1) + url.search,
+      willCallHandleGitHub: true
+    }, null, 2), 200, { 'Content-Type': 'application/json' });
+    
+    // 原来的代码（暂时注释）
+    // console.log('Entering handleGitHub, pathname:', url.pathname);
+    // return handleGitHub(request, url);
   }
 
   // 检查是否是注册表路径前缀（例如 /ghcr.io/... 或 /gcr.io/...）
@@ -1527,8 +1559,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.3.0-debug',  // 版本号
-      buildDate: '2024-10-15T12:50:00Z',
+      version: '1.3.1-debug',  // 版本号
+      buildDate: '2024-10-15T13:00:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
