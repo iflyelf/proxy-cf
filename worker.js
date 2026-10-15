@@ -1425,6 +1425,23 @@ function handleDockerHubLibraryRedirect(pathname) {
 
 async function handleRequest(request) {
   const url = new URL(request.url);
+  
+  // 全局调试：记录所有请求的 pathname
+  const debugInfo = {
+    pathname: url.pathname,
+    fullUrl: request.url,
+    startsWithHttps: url.pathname.startsWith('/https://'),
+    startsWithHttp: url.pathname.startsWith('/http://')
+  };
+  
+  // 如果是 /https:// 或 /http:// 开头，直接返回调试信息
+  if (url.pathname.startsWith('/https://') || url.pathname.startsWith('/http://')) {
+    return makeRes(JSON.stringify({
+      message: '🎯 ROUTE MATCHED at entry!',
+      debugInfo: debugInfo,
+      nextStep: 'Should call handleGitHub'
+    }, null, 2), 200, { 'Content-Type': 'application/json' });
+  }
 
   // 处理 OPTIONS 预检请求
   if (request.method === 'OPTIONS') {
@@ -1559,8 +1576,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.3.1-debug',  // 版本号
-      buildDate: '2024-10-15T13:00:00Z',
+      version: '1.3.2-debug',  // 版本号
+      buildDate: '2024-10-15T13:10:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
