@@ -1447,6 +1447,11 @@ async function handleRequest(request) {
     }, null, 2), 200, { 'Content-Type': 'application/json' });
   }
 
+  // GitHub 和其他 URL 加速（必须在 pathParts 检查之前）
+  if (url.pathname.startsWith('/http://') || url.pathname.startsWith('/https://')) {
+    return handleGitHub(request, url);
+  }
+
   // 检查是否是注册表路径前缀（例如 /ghcr.io/... 或 /gcr.io/...）
   const pathParts = url.pathname.split('/').filter(p => p);
   const firstPart = pathParts[0];
@@ -1472,11 +1477,6 @@ async function handleRequest(request) {
   // Google Sheets 代理
   if (url.pathname.startsWith('/sheet/')) {
     return handleGoogleSheet(request, url);
-  }
-
-  // GitHub 和其他 URL 加速
-  if (url.pathname.startsWith('/http://') || url.pathname.startsWith('/https://')) {
-    return handleGitHub(request, url);
   }
 
   // 调试信息
