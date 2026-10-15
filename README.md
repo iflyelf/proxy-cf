@@ -81,23 +81,37 @@ wrangler deploy worker.js
 
 ### 1. GitHub 加速
 
-#### Raw 文件
+支持两种 URL 格式：
+
+#### 方式1：URL 参数格式（推荐，兼容性最好）✅
+
 ```bash
+# Raw 文件
 # 原地址
 https://raw.githubusercontent.com/username/repo/main/file.txt
 
 # 加速地址
-https://proxy.xiaonuo.live/https://raw.githubusercontent.com/username/repo/main/file.txt
-```
+https://proxy.xiaonuo.live/proxy?url=https://raw.githubusercontent.com/username/repo/main/file.txt
 
-#### Release 下载
-```bash
+# Release 下载
 # 原地址
 https://github.com/username/repo/releases/download/v1.0/file.zip
 
 # 加速地址
+https://proxy.xiaonuo.live/proxy?url=https://github.com/username/repo/releases/download/v1.0/file.zip
+```
+
+#### 方式2：直接拼接格式（某些环境可能被阻止）
+
+```bash
+# Raw 文件
+https://proxy.xiaonuo.live/https://raw.githubusercontent.com/username/repo/main/file.txt
+
+# Release 下载
 https://proxy.xiaonuo.live/https://github.com/username/repo/releases/download/v1.0/file.zip
 ```
+
+**说明**：由于某些 Cloudflare 路由配置限制，建议优先使用方式1（URL 参数格式）。
 
 ### 2. Docker 镜像加速
 
@@ -327,11 +341,14 @@ docker pull proxy.xiaonuo.live/docker.cloudsmith.io/repo/image:tag
 # 原地址
 https://sourceforge.net/projects/projectname/files/file.zip
 
-# 加速地址
-https://proxy.xiaonuo.live/https://sourceforge.net/projects/projectname/files/file.zip
+# 方式1：URL 参数格式（推荐）✅
+https://proxy.xiaonuo.live/proxy?url=https://sourceforge.net/projects/projectname/files/file.zip
 
-# 或使用下载参数
+# 方式2：根路径参数
 https://proxy.xiaonuo.live/?url=https://sourceforge.net/projects/projectname/files/file.zip
+
+# 方式3：直接拼接
+https://proxy.xiaonuo.live/https://sourceforge.net/projects/projectname/files/file.zip
 ```
 
 ### 4. Google Sheets 代理
@@ -349,16 +366,26 @@ https://proxy.xiaonuo.live/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
 ### 5. 直链下载加速
 
 ```bash
-# 方式1：使用 URL 参数
+# 方式1：URL 参数格式（推荐）✅
+https://proxy.xiaonuo.live/proxy?url=https://example.com/file.zip
+
+# 方式2：根路径参数
 https://proxy.xiaonuo.live/?url=https://example.com/file.zip
 
-# 方式2：直接拼接
+# 方式3：直接拼接（某些环境可能被阻止）
 https://proxy.xiaonuo.live/https://example.com/file.zip
 ```
 
+**推荐使用方式1**，兼容性最好，不受路由限制。
+
 ### 6. Git 配置加速
 
-#### 全局配置
+#### 全局配置（方式1 - 推荐）
+```bash
+git config --global url."https://proxy.xiaonuo.live/proxy?url=https://github.com/".insteadOf "https://github.com/"
+```
+
+#### 全局配置（方式2）
 ```bash
 git config --global url."https://proxy.xiaonuo.live/https://github.com/".insteadOf "https://github.com/"
 ```
@@ -366,11 +393,13 @@ git config --global url."https://proxy.xiaonuo.live/https://github.com/".instead
 #### 针对单个仓库
 ```bash
 cd your-repo
-git config url."https://proxy.xiaonuo.live/https://github.com/".insteadOf "https://github.com/"
+git config url."https://proxy.xiaonuo.live/proxy?url=https://github.com/".insteadOf "https://github.com/"
 ```
 
 #### 取消配置
 ```bash
+git config --global --unset url."https://proxy.xiaonuo.live/proxy?url=https://github.com/".insteadOf
+# 或
 git config --global --unset url."https://proxy.xiaonuo.live/https://github.com/".insteadOf
 ```
 
@@ -533,7 +562,10 @@ curl https://proxy.xiaonuo.live/v2/
 # 测试其他注册表 API
 curl https://proxy.xiaonuo.live/v2/ghcr.io/linuxserver/baseimage-alpine/tags/list
 
-# 测试 GitHub 加速
+# 测试 GitHub 加速（方式1 - 推荐）✅
+curl 'https://proxy.xiaonuo.live/proxy?url=https://raw.githubusercontent.com/kubernetes/kubernetes/master/README.md'
+
+# 测试 GitHub 加速（方式2）
 curl https://proxy.xiaonuo.live/https://raw.githubusercontent.com/kubernetes/kubernetes/master/README.md
 
 # 查看调试信息
