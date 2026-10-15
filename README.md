@@ -15,7 +15,9 @@
 ### ✅ GitHub 加速
 - GitHub Raw 文件加速
 - GitHub Release 下载加速
-- GitHub API 加速
+- Git Clone 克隆加速
+- 完整的 Git 协议支持
+- 支持 clone、pull、fetch 等所有 Git 操作
 - 完整的 CORS 支持
 
 ### ✅ Docker 镜像加速
@@ -50,7 +52,7 @@
 
 ## 📦 部署
 
-### 方法1：Cloudflare Dashboard 部署（推荐）
+### Cloudflare Dashboard 部署
 
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. 进入 **Workers & Pages** → **Create Application** → **Create Worker**
@@ -64,18 +66,10 @@
 7. 配置自定义域名：**Settings** → **Triggers** → **Add Custom Domain**
    - 输入：`proxy.xiaonuo.live`
 
-### 方法2：Wrangler CLI 部署
-
-```bash
-# 安装 Wrangler
-npm install -g wrangler
-
-# 登录 Cloudflare
-wrangler login
-
-# 部署
-wrangler deploy worker.js
-```
+**注意事项：**
+- Worker 代码文件较大（约 54KB），请确保完整复制
+- 建议使用 Dashboard 的代码编辑器直接粘贴部署
+- 部署后访问自定义域名验证功能是否正常
 
 ## 📖 使用说明
 
@@ -378,14 +372,63 @@ https://proxy.xiaonuo.live/https://example.com/file.zip
 
 **推荐使用方式1**，兼容性最好，不受路由限制。
 
-### 6. Git 配置加速
+### 6. Git Clone 加速
+
+#### 方式1：单次克隆（无需配置）
+```bash
+# 直接使用代理 URL 克隆
+git clone https://proxy.xiaonuo.live/proxy?url=https://github.com/username/repo.git
+
+# 示例
+git clone https://proxy.xiaonuo.live/proxy?url=https://github.com/torvalds/linux.git
+git clone https://proxy.xiaonuo.live/proxy?url=https://github.com/kubernetes/kubernetes.git
+```
+
+#### 方式2：全局配置（推荐 - 所有仓库自动使用）
+```bash
+# 配置 Git 使用代理
+git config --global url."https://proxy.xiaonuo.live/proxy?url=https://github.com/".insteadOf "https://github.com/"
+
+# 验证配置
+git config --get-regexp url
+
+# 之后所有 Git 操作自动使用代理
+git clone https://github.com/username/repo.git
+git pull
+git fetch
+
+# 取消配置
+git config --global --unset url."https://proxy.xiaonuo.live/proxy?url=https://github.com/".insteadOf
+```
+
+#### 方式3：单个仓库配置
+```bash
+cd your-repo
+git config url."https://proxy.xiaonuo.live/proxy?url=https://github.com/".insteadOf "https://github.com/"
+
+# 只在当前仓库生效
+git pull
+git fetch
+```
+
+**功能特点：**
+- ✅ 支持 clone、pull、fetch 等所有 Git 操作
+- ✅ 完整的 Git 协议支持（/info/refs、/git-upload-pack 等）
+- ✅ 支持大型仓库克隆
+- ✅ 配置后自动生效，无需修改每个命令
+
+### 7. Git 配置加速（旧方式 - 仅供参考）
+
+### 7. Git 配置加速（旧方式 - 仅供参考）
+
+**注意：** 以下方式可能在某些环境中不可用，推荐使用上面的方式1或方式2。
 
 #### 全局配置（方式1 - 推荐）
 ```bash
 git config --global url."https://proxy.xiaonuo.live/proxy?url=https://github.com/".insteadOf "https://github.com/"
 ```
 
-#### 全局配置（方式2）
+#### 全局配置（方式2 - 可能被 Cloudflare 阻止）
 ```bash
 git config --global url."https://proxy.xiaonuo.live/https://github.com/".insteadOf "https://github.com/"
 ```
@@ -562,17 +605,20 @@ curl https://proxy.xiaonuo.live/v2/
 # 测试其他注册表 API
 curl https://proxy.xiaonuo.live/v2/ghcr.io/linuxserver/baseimage-alpine/tags/list
 
-# 测试 GitHub 加速（方式1 - 推荐）✅
+# 测试 GitHub Raw 文件加速
 curl 'https://proxy.xiaonuo.live/proxy?url=https://raw.githubusercontent.com/kubernetes/kubernetes/master/README.md'
 
-# 测试 GitHub 加速（方式2）
-curl https://proxy.xiaonuo.live/https://raw.githubusercontent.com/kubernetes/kubernetes/master/README.md
+# 测试 GitHub Release 下载
+curl -I 'https://proxy.xiaonuo.live/proxy?url=https://github.com/junegunn/fzf/releases/download/v0.54.0/fzf-0.54.0-linux_amd64.tar.gz'
+
+# 测试 Git Clone 加速
+git clone https://proxy.xiaonuo.live/proxy?url=https://github.com/octocat/Hello-World.git
+
+# 测试 Google Sheets 代理
+curl 'https://proxy.xiaonuo.live/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'
 
 # 查看调试信息
 curl https://proxy.xiaonuo.live/debug
-
-# 调试请求详情（查看实际接收到的请求）
-curl https://proxy.xiaonuo.live/debug-request
 ```
 
 ### 推荐测试的公开镜像

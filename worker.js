@@ -1831,8 +1831,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.8.0',  // 版本号
-      buildDate: '2024-10-15T14:45:00Z',
+      version: '1.8.1',  // 版本号
+      buildDate: '2024-10-15T14:50:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
