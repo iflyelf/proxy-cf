@@ -731,10 +731,10 @@ https://${CONFIG.domain}/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms</pre
                 <h2>⚙️ Git 配置加速</h2>
                 <p>配置 Git 使用代理加速克隆</p>
                 <pre># 配置 Git 使用代理
-git config --global url."https://${CONFIG.domain}/https://github.com/".insteadOf "https://github.com/"
+git config --global url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf "https://github.com/"
 
 # 取消代理
-git config --global --unset url."https://${CONFIG.domain}/https://github.com/".insteadOf</pre>
+git config --global --unset url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf</pre>
             </div>
 
             <div class="service-card">
@@ -744,7 +744,7 @@ git config --global --unset url."https://${CONFIG.domain}/https://github.com/".i
 https://sourceforge.net/projects/project/files/file.zip
 
 加速地址：
-https://${CONFIG.domain}/https://sourceforge.net/projects/project/files/file.zip</pre>
+https://${CONFIG.domain}/proxy?url=https://sourceforge.net/projects/project/files/file.zip</pre>
             </div>
         </div>
         
@@ -996,14 +996,14 @@ https://${CONFIG.domain}/proxy?url=https://sourceforge.net/projects/project/file
                     <h3>⚙️ Git 配置加速</h3>
                     <p>配置 Git 使用代理进行 clone 加速：</p>
                     <pre># 全局配置
-git config --global url."https://${CONFIG.domain}/https://github.com/".insteadOf "https://github.com/"
+git config --global url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf "https://github.com/"
 
 # 单个仓库配置
 cd your-repo
-git config url."https://${CONFIG.domain}/https://github.com/".insteadOf "https://github.com/"
+git config url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf "https://github.com/"
 
 # 取消配置
-git config --global --unset url."https://${CONFIG.domain}/https://github.com/".insteadOf</pre>
+git config --global --unset url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf</pre>
                 </div>
                 
                 <div class="help-item">
@@ -1561,8 +1561,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.5.1',  // 版本号
-      buildDate: '2024-10-15T13:40:00Z',
+      version: '1.5.2',  // 版本号
+      buildDate: '2024-10-15T13:45:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
