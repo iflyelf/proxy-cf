@@ -1068,20 +1068,20 @@ https://${CONFIG.domain}/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
                 return;
             }
 
-            const proxyUrl = window.location.origin + '?url=' + encodeURIComponent(url);
-            const directUrl = window.location.origin + '/' + url;
+            const proxyUrl1 = window.location.origin + '/proxy?url=' + encodeURIComponent(url);
+            const proxyUrl2 = window.location.origin + '?url=' + encodeURIComponent(url);
 
             resultDiv.innerHTML = \`
                 <div style="margin-bottom: 10px;">
                     <strong>✅ 加速链接已生成：</strong>
                 </div>
                 <div style="margin-bottom: 15px;">
-                    <strong>方式1（下载）：</strong><br>
-                    <a href="\${proxyUrl}" target="_blank">\${proxyUrl}</a>
+                    <strong>方式1（推荐）：</strong><br>
+                    <a href="\${proxyUrl1}" target="_blank">\${proxyUrl1}</a>
                 </div>
                 <div>
-                    <strong>方式2（直接访问）：</strong><br>
-                    <a href="\${directUrl}" target="_blank">\${directUrl}</a>
+                    <strong>方式2（备用）：</strong><br>
+                    <a href="\${proxyUrl2}" target="_blank">\${proxyUrl2}</a>
                 </div>
             \`;
             resultDiv.classList.add('show');
@@ -1561,8 +1561,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.5.2',  // 版本号
-      buildDate: '2024-10-15T13:45:00Z',
+      version: '1.5.3',  // 版本号
+      buildDate: '2024-10-15T13:50:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
