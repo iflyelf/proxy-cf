@@ -1352,7 +1352,8 @@ curl -I 'https://${CONFIG.domain}/proxy?url=https://sourceforge.net/'
                 return;
             }
 
-            const cloneUrl = window.location.origin + '/proxy?url=' + encodeURIComponent(gitUrl);
+            // Git Clone 命令行不需要 URL 编码
+            const cloneUrl = window.location.origin + '/proxy?url=' + gitUrl;
             const gitCommand = 'git clone ' + cloneUrl;
 
             resultDiv.innerHTML = \`
@@ -1960,8 +1961,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.9.0',  // 版本号
-      buildDate: '2024-10-15T15:00:00Z',
+      version: '1.9.1',  // 版本号
+      buildDate: '2024-10-15T15:05:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
