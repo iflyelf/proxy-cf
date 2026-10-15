@@ -1105,6 +1105,49 @@ https://${CONFIG.domain}/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
                 </div>
                 
                 <div class="help-item">
+                    <h3>✅ 功能验证示例</h3>
+                    <p>以下命令可用于验证各项功能是否正常工作：</p>
+                    <pre># 1️⃣  验证直链下载加速
+curl -s 'https://${CONFIG.domain}/proxy?url=https://httpbin.org/get' | head -5
+# ✓ 应看到 JSON 数据（包含 args, headers 等）
+
+# 2️⃣  验证 GitHub Raw 文件加速
+curl -s 'https://${CONFIG.domain}/proxy?url=https://raw.githubusercontent.com/octocat/Hello-World/master/README'
+# ✓ 应看到 "Hello World!" 文本
+
+# 3️⃣  验证 GitHub Release 下载
+curl -I 'https://${CONFIG.domain}/proxy?url=https://github.com/junegunn/fzf/releases/download/v0.54.0/fzf-0.54.0-linux_amd64.tar.gz'
+# ✓ 应看到 HTTP 200 和 Content-Type
+
+# 4️⃣  验证 Git Clone 加速（协议端点）
+curl -s 'https://${CONFIG.domain}/proxy/info/refs?url=https://github.com/octocat/Hello-World.git&service=git-upload-pack' | head -3
+# ✓ 应看到 "# service=git-upload-pack" 开头的数据
+
+# 5️⃣  验证 Git Clone（实际克隆）
+git clone https://${CONFIG.domain}/proxy?url=https://github.com/octocat/Spoon-Knife.git
+# ✓ 应成功克隆仓库并看到文件
+
+# 6️⃣  验证全局 Git 配置
+git config --global url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf "https://github.com/"
+git config --get-regexp url
+git clone https://github.com/octocat/Hello-World.git
+# ✓ 配置后自动使用代理克隆
+# 清理配置：git config --global --unset url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf
+
+# 7️⃣  验证 Google Sheets 代理
+curl -s 'https://${CONFIG.domain}/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms' | head -3
+# ✓ 应看到 JSON 格式的表格数据
+
+# 8️⃣  验证 Docker Hub API
+curl -s 'https://${CONFIG.domain}/v2/'
+# ✓ 应看到 {} 或包含 docker 的响应
+
+# 9️⃣  验证 SourceForge 加速
+curl -I 'https://${CONFIG.domain}/proxy?url=https://sourceforge.net/'
+# ✓ 应看到 HTTP 200 或 302</pre>
+                </div>
+                
+                <div class="help-item">
                     <h3>🔍 故障排查</h3>
                     <div class="faq">
                         <p><strong>Q: Docker 拉取失败？</strong></p>
@@ -1788,8 +1831,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.7.3',  // 版本号
-      buildDate: '2024-10-15T14:35:00Z',
+      version: '1.8.0',  // 版本号
+      buildDate: '2024-10-15T14:45:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
