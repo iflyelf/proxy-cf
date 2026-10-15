@@ -1656,11 +1656,38 @@ async function handleRequest(request) {
   }
   
   // GitHub 和其他 URL 加速 - 方式2：/proxy?url=... 格式（推荐）
-  if (url.pathname === '/proxy' && url.searchParams.has('url')) {
-    const targetUrl = url.searchParams.get('url');
+  if (url.pathname.startsWith('/proxy')) {
+    // 处理两种情况：
+    // 1. /proxy?url=... （普通文件下载）
+    // 2. /proxy/path/to/resource （Git clone 附加的路径）
+    
+    let targetUrl;
+    
+    if (url.searchParams.has('url')) {
+      // 情况1：有 url 参数
+      targetUrl = url.searchParams.get('url');
+      
+      // 如果路径不是 /proxy，说明 Git 添加了额外路径（如 /info/refs）
+      if (url.pathname !== '/proxy') {
+        const extraPath = url.pathname.substring('/proxy'.length);
+        targetUrl = targetUrl + extraPath;
+      }
+      
+      // 添加原始的查询参数（除了 url 参数）
+      const params = new URLSearchParams(url.search);
+      params.delete('url');
+      if (params.toString()) {
+        targetUrl = targetUrl + (targetUrl.includes('?') ? '&' : '?') + params.toString();
+      }
+    } else {
+      // 情况2：没有 url 参数，整个路径就是目标
+      return makeRes('Missing url parameter', 400);
+    }
+    
     if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
       return makeRes('Invalid URL: must start with http:// or https://', 400);
     }
+    
     // 创建一个假的 URL 对象来复用 handleGitHub
     const fakeUrl = new URL(request.url);
     fakeUrl.pathname = '/' + targetUrl;
@@ -1698,8 +1725,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.7.0',  // 版本号
-      buildDate: '2024-10-15T14:10:00Z',
+      version: '1.7.1',  // 版本号
+      buildDate: '2024-10-15T14:20:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
