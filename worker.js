@@ -1468,9 +1468,31 @@ async function handleRequest(request) {
       ]
     }, null, 2), 200, { 'Content-Type': 'application/json' });
   }
+  
+  // GitHub 加速测试端点
+  if (url.pathname === '/test-github') {
+    const testUrl = 'https://httpbin.org/get';
+    try {
+      const response = await fetch(testUrl);
+      const data = await response.text();
+      return makeRes(JSON.stringify({
+        success: true,
+        targetUrl: testUrl,
+        statusCode: response.status,
+        contentPreview: data.substring(0, 200)
+      }, null, 2), 200, { 'Content-Type': 'application/json' });
+    } catch (error) {
+      return makeRes(JSON.stringify({
+        success: false,
+        error: error.message
+      }, null, 2), 500, { 'Content-Type': 'application/json' });
+    }
+  }
 
   // GitHub 和其他 URL 加速（必须在 pathParts 检查之前）
   if (url.pathname.startsWith('/http://') || url.pathname.startsWith('/https://')) {
+    // 调试：记录进入 GitHub 处理
+    console.log('Entering handleGitHub, pathname:', url.pathname);
     return handleGitHub(request, url);
   }
 
@@ -1505,8 +1527,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.2.0',  // 版本号
-      buildDate: '2024-10-15T11:45:00Z',
+      version: '1.3.0-debug',  // 版本号
+      buildDate: '2024-10-15T12:50:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
