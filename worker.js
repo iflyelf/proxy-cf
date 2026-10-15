@@ -786,12 +786,21 @@ https://${CONFIG.domain}/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms</pre
             </div>
 
             <div class="service-card">
-                <h2>⚙️ Git 配置加速</h2>
-                <p>配置 Git 使用代理加速克隆</p>
-                <pre># 配置 Git 使用代理
+                <h2>⚙️ Git Clone 加速</h2>
+                <p>配置 Git 使用代理加速克隆和拉取</p>
+                <pre># 方式1：全局配置（推荐）
 git config --global url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf "https://github.com/"
 
-# 取消代理
+# 方式2：单次克隆（无需配置）
+git clone https://${CONFIG.domain}/proxy?url=https://github.com/torvalds/linux.git
+
+# 验证配置
+git config --get-regexp url
+
+# 测试克隆速度
+git clone https://github.com/kubernetes/kubernetes.git
+
+# 取消配置
 git config --global --unset url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf</pre>
             </div>
 
@@ -1051,17 +1060,36 @@ https://${CONFIG.domain}/proxy?url=https://sourceforge.net/projects/project/file
                 </div>
                 
                 <div class="help-item">
-                    <h3>⚙️ Git 配置加速</h3>
-                    <p>配置 Git 使用代理进行 clone 加速：</p>
-                    <pre># 全局配置
+                    <h3>⚙️ Git Clone 加速详解</h3>
+                    <p>配置 Git 使用代理进行 clone、pull、fetch 加速：</p>
+                    <pre># 🔧 全局配置（推荐 - 所有仓库生效）
 git config --global url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf "https://github.com/"
 
-# 单个仓库配置
+# ✅ 验证配置
+git config --get-regexp url
+# 输出：url.https://${CONFIG.domain}/proxy?url=https://github.com/.insteadof https://github.com/
+
+# 🚀 测试克隆（配置后自动使用代理）
+git clone https://github.com/kubernetes/kubernetes.git
+git clone https://github.com/torvalds/linux.git
+
+# 📦 单次克隆（不修改全局配置）
+git clone https://${CONFIG.domain}/proxy?url=https://github.com/USERNAME/REPO.git
+
+# 🔄 已有仓库更新（配置后自动使用代理）
+cd existing-repo
+git pull
+git fetch
+
+# 📁 单个仓库配置（仅当前仓库生效）
 cd your-repo
 git config url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf "https://github.com/"
 
-# 取消配置
-git config --global --unset url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf</pre>
+# ❌ 取消全局配置
+git config --global --unset url."https://${CONFIG.domain}/proxy?url=https://github.com/".insteadOf
+
+# 📋 查看所有 Git 配置
+git config --list --show-origin | grep url</pre>
                 </div>
                 
                 <div class="help-item">
@@ -1670,8 +1698,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.6.0',  // 版本号
-      buildDate: '2024-10-15T14:00:00Z',
+      version: '1.7.0',  // 版本号
+      buildDate: '2024-10-15T14:10:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
