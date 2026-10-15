@@ -643,15 +643,11 @@ function generateHomePage() {
             <div class="service-card">
                 <h2>🐙 GitHub 加速</h2>
                 <p>加速访问 GitHub Raw 和 Release 文件</p>
-                <pre>方式1：URL 参数格式（推荐）✅
-原地址：
+                <pre>原地址：
 https://github.com/junegunn/fzf/releases/download/v0.54.0/fzf-0.54.0-linux_amd64.tar.gz
 
 加速地址：
 https://${CONFIG.domain}/proxy?url=https://github.com/junegunn/fzf/releases/download/v0.54.0/fzf-0.54.0-linux_amd64.tar.gz
-
-方式2：直接拼接格式
-https://${CONFIG.domain}/https://github.com/junegunn/fzf/releases/download/v0.54.0/fzf-0.54.0-linux_amd64.tar.gz
 
 Raw 文件加速：
 https://${CONFIG.domain}/proxy?url=https://raw.githubusercontent.com/kubernetes/kubernetes/master/README.md</pre>
@@ -970,33 +966,27 @@ docker pull ${CONFIG.domain}/docker.cloudsmith.io/org/repo/image:tag</pre>
                 
                 <div class="help-item">
                     <h3>🐙 GitHub 文件加速</h3>
-                    <p>支持两种 URL 格式：</p>
-                    <pre># 方式1：URL 参数格式（推荐，兼容性最好）✅
+                    <p>在 GitHub URL 前添加代理地址：</p>
+                    <pre># Raw 文件加速
 原地址: https://raw.githubusercontent.com/kubernetes/kubernetes/master/README.md
 加速后: https://${CONFIG.domain}/proxy?url=https://raw.githubusercontent.com/kubernetes/kubernetes/master/README.md
 
-# 方式2：直接拼接格式（某些环境可能不支持）
-加速后: https://${CONFIG.domain}/https://raw.githubusercontent.com/kubernetes/kubernetes/master/README.md
-
-# Release 下载加速示例（推荐格式）✅
+# Release 下载加速
 原地址: https://github.com/junegunn/fzf/releases/download/v0.54.0/fzf-0.54.0-linux_amd64.tar.gz
 加速后: https://${CONFIG.domain}/proxy?url=https://github.com/junegunn/fzf/releases/download/v0.54.0/fzf-0.54.0-linux_amd64.tar.gz
 
-# 其他测试链接
+# 其他示例
 https://${CONFIG.domain}/proxy?url=https://github.com/golang/go/archive/refs/tags/go1.21.0.tar.gz</pre>
                 </div>
                 
                 <div class="help-item">
                     <h3>📥 通用文件下载</h3>
                     <p>支持任意 HTTP/HTTPS 文件加速：</p>
-                    <pre># 方式1：URL 参数（推荐）✅
+                    <pre># 方式1：/proxy?url= 格式（推荐）
 https://${CONFIG.domain}/proxy?url=YOUR_FILE_URL
 
 # 方式2：根路径参数
 https://${CONFIG.domain}/?url=YOUR_FILE_URL
-
-# 方式3：直接拼接（某些环境可能不支持）
-https://${CONFIG.domain}/https://example.com/file.zip
 
 # SourceForge 示例
 https://${CONFIG.domain}/proxy?url=https://sourceforge.net/projects/project/files/file.zip</pre>
@@ -1571,8 +1561,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.5.0',  // 版本号
-      buildDate: '2024-10-15T13:30:00Z',
+      version: '1.5.1',  // 版本号
+      buildDate: '2024-10-15T13:40:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
