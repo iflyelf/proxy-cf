@@ -1649,6 +1649,31 @@ async function handleRequest(request) {
       }, null, 2), 500, { 'Content-Type': 'application/json' });
     }
   }
+  
+  // Git 代理调试端点
+  if (url.pathname.startsWith('/test-git-proxy')) {
+    const urlParam = url.searchParams.get('url');
+    const extraPath = url.pathname.substring('/test-git-proxy'.length);
+    const params = new URLSearchParams(url.search);
+    params.delete('url');
+    
+    let targetUrl = urlParam;
+    if (extraPath) {
+      targetUrl = targetUrl + extraPath;
+    }
+    if (params.toString()) {
+      targetUrl = targetUrl + (targetUrl.includes('?') ? '&' : '?') + params.toString();
+    }
+    
+    return makeRes(JSON.stringify({
+      originalPath: url.pathname,
+      originalSearch: url.search,
+      urlParam: urlParam,
+      extraPath: extraPath,
+      extraParams: params.toString(),
+      targetUrl: targetUrl
+    }, null, 2), 200, { 'Content-Type': 'application/json' });
+  }
 
   // GitHub 和其他 URL 加速 - 方式1：/https://... 格式（可能被 Cloudflare 阻止）
   if (url.pathname.startsWith('/http://') || url.pathname.startsWith('/https://')) {
@@ -1679,6 +1704,13 @@ async function handleRequest(request) {
       if (params.toString()) {
         targetUrl = targetUrl + (targetUrl.includes('?') ? '&' : '?') + params.toString();
       }
+      
+      // 调试日志
+      console.log('Git proxy debug:', {
+        originalPath: url.pathname,
+        originalSearch: url.search,
+        targetUrl: targetUrl
+      });
     } else {
       // 情况2：没有 url 参数，整个路径就是目标
       return makeRes('Missing url parameter', 400);
@@ -1725,8 +1757,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.7.1',  // 版本号
-      buildDate: '2024-10-15T14:20:00Z',
+      version: '1.7.2-debug',  // 版本号
+      buildDate: '2024-10-15T14:30:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
