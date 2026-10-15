@@ -1446,6 +1446,28 @@ async function handleRequest(request) {
       headers: Object.fromEntries(request.headers),
     }, null, 2), 200, { 'Content-Type': 'application/json' });
   }
+  
+  // 测试路由端点
+  if (url.pathname === '/test-route') {
+    const testPath = '/https://github.com/test';
+    return makeRes(JSON.stringify({
+      testPath: testPath,
+      startsWithHttps: testPath.startsWith('/https://'),
+      startsWithHttp: testPath.startsWith('/http://'),
+      routeOrder: [
+        '1. OPTIONS check',
+        '2. Root path check',
+        '3. debug-request check',
+        '4. test-route check (YOU ARE HERE)',
+        '5. GitHub URL check (startsWith /http:// or /https://)',
+        '6. pathParts check',
+        '7. Docker v2 check',
+        '8. Google Sheets check',
+        '9. debug check',
+        '10. 404'
+      ]
+    }, null, 2), 200, { 'Content-Type': 'application/json' });
+  }
 
   // GitHub 和其他 URL 加速（必须在 pathParts 检查之前）
   if (url.pathname.startsWith('/http://') || url.pathname.startsWith('/https://')) {
@@ -1483,6 +1505,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
+      version: '1.2.0',  // 版本号
+      buildDate: '2024-10-15T11:45:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
