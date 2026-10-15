@@ -135,6 +135,9 @@ function generateHomePage() {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid var(--border-color);
             backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            min-height: 280px; /* 确保卡片最小高度一致 */
         }
         
         .service-card:hover { 
@@ -144,10 +147,13 @@ function generateHomePage() {
         
         .service-card h2 { 
             color: var(--color-primary); 
-            margin-bottom: 14px; 
+            margin-bottom: 12px; 
             font-size: 1.375rem; 
             font-weight: 600;
             letter-spacing: -0.02em;
+            min-height: 40px; /* 标题高度统一 */
+            display: flex;
+            align-items: center;
         }
         
         .service-card p { 
@@ -155,6 +161,7 @@ function generateHomePage() {
             margin-bottom: 16px; 
             font-size: 0.9375rem;
             line-height: 1.6;
+            min-height: 48px; /* 描述高度统一 */
         }
         
         .service-card pre {
@@ -162,11 +169,13 @@ function generateHomePage() {
             padding: 16px;
             border-radius: var(--radius-sm);
             overflow-x: auto;
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             border: 1px solid var(--border-color);
             line-height: 1.7;
             font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
             color: var(--color-text);
+            flex: 1; /* 让代码块填充剩余空间 */
+            margin: 0;
         }
         
         .url-input-section {
@@ -359,6 +368,55 @@ function generateHomePage() {
             font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
             color: var(--color-text);
             margin-top: 12px;
+            position: relative;
+        }
+        
+        /* 代码块容器 */
+        .code-block {
+            position: relative;
+            margin-top: 12px;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            padding-right: 60px; /* 为复制按钮留出空间 */
+        }
+        
+        /* 复制按钮样式 */
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 6px 12px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            opacity: 0.9;
+            box-shadow: none;
+        }
+        
+        .copy-btn:hover {
+            opacity: 1;
+            background: var(--color-secondary);
+            transform: none;
+            box-shadow: 0 2px 8px rgba(201, 168, 130, 0.3);
+        }
+        
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .copy-btn.copied {
+            background: #27ae60;
+        }
+        
+        .copy-btn.copied::after {
+            content: ' ✓';
         }
         
         .help-item ul {
@@ -1052,6 +1110,51 @@ https://${CONFIG.domain}/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
     </div>
 
     <script>
+        // 复制到剪贴板功能
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '已复制';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                button.textContent = '复制失败';
+                setTimeout(() => {
+                    button.textContent = '复制';
+                }, 2000);
+            });
+        }
+        
+        // 为所有代码块添加复制按钮
+        document.addEventListener('DOMContentLoaded', () => {
+            const preElements = document.querySelectorAll('pre');
+            preElements.forEach(pre => {
+                // 跳过已经有复制按钮的
+                if (pre.parentElement.classList.contains('code-block')) {
+                    return;
+                }
+                
+                // 创建容器
+                const wrapper = document.createElement('div');
+                wrapper.className = 'code-block';
+                pre.parentNode.insertBefore(wrapper, pre);
+                wrapper.appendChild(pre);
+                
+                // 创建复制按钮
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = '复制';
+                copyBtn.onclick = () => copyToClipboard(pre.textContent.trim(), copyBtn);
+                
+                wrapper.appendChild(copyBtn);
+            });
+        });
+        
         function generateProxyUrl() {
             const url = document.getElementById('url').value.trim();
             const resultDiv = document.getElementById('result');
@@ -1077,11 +1180,17 @@ https://${CONFIG.domain}/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
                 </div>
                 <div style="margin-bottom: 15px;">
                     <strong>方式1（推荐）：</strong><br>
-                    <a href="\${proxyUrl1}" target="_blank">\${proxyUrl1}</a>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                        <a href="\${proxyUrl1}" target="_blank" style="flex: 1; word-break: break-all;">\${proxyUrl1}</a>
+                        <button class="copy-btn" onclick="copyToClipboard('\${proxyUrl1.replace(/'/g, "\\'")}', this)" style="position: static; opacity: 1;">复制</button>
+                    </div>
                 </div>
                 <div>
                     <strong>方式2（备用）：</strong><br>
-                    <a href="\${proxyUrl2}" target="_blank">\${proxyUrl2}</a>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                        <a href="\${proxyUrl2}" target="_blank" style="flex: 1; word-break: break-all;">\${proxyUrl2}</a>
+                        <button class="copy-btn" onclick="copyToClipboard('\${proxyUrl2.replace(/'/g, "\\'")}', this)" style="position: static; opacity: 1;">复制</button>
+                    </div>
                 </div>
             \`;
             resultDiv.classList.add('show');
@@ -1561,8 +1670,8 @@ async function handleRequest(request) {
   if (url.pathname === '/debug') {
     const pathParts = url.pathname.split('/').filter(p => p);
     return makeRes(JSON.stringify({
-      version: '1.5.3',  // 版本号
-      buildDate: '2024-10-15T13:50:00Z',
+      version: '1.6.0',  // 版本号
+      buildDate: '2024-10-15T14:00:00Z',
       domain: CONFIG.domain,
       dockerRegistries: Object.keys(CONFIG.dockerRegistries),
       features: [
