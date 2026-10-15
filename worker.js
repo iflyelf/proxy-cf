@@ -1046,7 +1046,7 @@ https://${CONFIG.domain}/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
         </div>
         
         <footer>
-            <p>Powered by Cloudflare Workers | <a href="https://www.danxiaonuo.me" target="_blank">xiaonuo</a></p>
+            <p>Powered by Cloudflare Workers | <a href="https://github.com/iflyelf/proxy-cf" target="_blank">GitHub</a> | <a href="https://www.danxiaonuo.me" target="_blank">xiaonuo</a></p>
             <p style="margin-top: 10px; opacity: 0.8;">开源、免费、无限制</p>
         </footer>
     </div>

@@ -1,6 +1,14 @@
-# 多功能加速代理
+# 多功能加速代理 - Cloudflare Workers
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange)](https://workers.cloudflare.com/)
 
 一个基于 Cloudflare Workers 的多功能加速代理服务，支持 GitHub、Docker、SourceForge、Google Sheets 等资源的加速访问。
+
+## 🌟 在线演示
+
+- 主页：`https://proxy.xiaonuo.live`
+- 项目地址：[https://github.com/iflyelf/proxy-cf](https://github.com/iflyelf/proxy-cf)
 
 ## 🚀 功能特性
 
